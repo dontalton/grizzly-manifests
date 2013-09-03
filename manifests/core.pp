@@ -21,11 +21,11 @@ node base {
 
     # Load apt prerequisites.  This is only valid on Ubuntu systmes
     if($::package_repo == 'cisco_repo') {
-      apt::source { "cisco-openstack-mirror_grizzly":
+      apt::source { 'cisco-openstack-mirror_grizzly':
         location    => "$::location/cisco",
-        release     => "grizzly-proposed",
-        repos       => "main",
-        key         => "E8CC67053ED3B199",
+        release     => 'grizzly-proposed',
+        repos       => 'main',
+        key         => 'E8CC67053ED3B199',
         proxy       => $::proxy,
         key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.11 (GNU/Linux)
@@ -61,11 +61,11 @@ UcXHbA==
       }
 
       if $::supplemental_repo {
-        apt::source { "cisco_supplemental-openstack-mirror_grizzly":
-          location    => "$::supplemental_repo",
-          release     => "grizzly-proposed",
-          repos       => "main",
-          key         => "E8CC67053ED3B199",
+        apt::source { 'cisco_supplemental-openstack-mirror_grizzly':
+          location    => $::supplemental_repo,
+          release     => 'grizzly-proposed',
+          repos       => 'main',
+          key         => 'E8CC67053ED3B199',
           proxy       => $::proxy,
           key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.11 (GNU/Linux)
@@ -99,21 +99,21 @@ UcXHbA==
 =v6jg
 -----END PGP PUBLIC KEY BLOCK-----',
         }
-        apt::pin { "cisco_supplemental":
+        apt::pin { 'cisco_supplemental':
           priority   => '990',
           originator => 'Cisco_Supplemental'
         }
       }
 
-      apt::pin { "cisco":
+      apt::pin { 'cisco':
         priority   => '990',
         originator => 'Cisco'
       }
     } elsif($::package_repo == 'cloud_archive') {
       apt::source { 'openstack_cloud_archive':
-        location          => "http://ubuntu-cloud.archive.canonical.com/ubuntu",
-        release           => "precise-updates/grizzly",
-        repos             => "main",
+        location          => 'http://ubuntu-cloud.archive.canonical.com/ubuntu',
+        release           => 'precise-updates/grizzly',
+        repos             => 'main',
         required_packages => 'ubuntu-cloud-keyring',
       }
     } else {
@@ -122,16 +122,16 @@ UcXHbA==
   }
   elsif ($osfamily == 'redhat') {
     yumrepo { 'cisco-openstack-mirror':
-      descr    => "Cisco Openstack Repository",
+      descr    => 'Cisco Openstack Repository',
       baseurl  => $::location,
-      gpgcheck => "0", #TODO(prad): Add gpg key
-      enabled  => "1";
+      gpgcheck => '0', #TODO(prad): Add gpg key
+      enabled  => '1';
     }
     # add a resource dependency so yumrepo loads before package
     Yumrepo <| |> -> Package <| |>
   }
 
-  class { pip: }
+  class { 'pip': }
 
   # Ensure that the pip packages are fetched appropriately when we're using an
   # install where there's no direct connection to the net from the openstack
@@ -147,7 +147,7 @@ UcXHbA==
       }
     }
   }
-  # (the equivalent work for apt is done by the cobbler boot, which 
+  # (the equivalent work for apt is done by the cobbler boot, which
   # sets this up as a part of the installation.)
 
   # /etc/hosts entries for the controller nodes
@@ -164,10 +164,10 @@ UcXHbA==
 node os_base inherits base {
   $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
-  class { ntp:
-    servers     => [$build_node_fqdn],
+  class { 'ntp':
     ensure      => running,
-    autoupdate 	=> true,
+    servers     => [$build_node_fqdn],
+    autoupdate  => true,
   }
 
   # Deploy a script that can be used to test nova
@@ -180,7 +180,7 @@ node os_base inherits base {
     controller_node => $controller_node_internal,
   }
 
-  class { "naginator::base_target": }
+  class { 'naginator::base_target': }
 
   # This value can be set to true to increase debug logging when
   # trouble-shooting services. It should not generally be set to
@@ -322,7 +322,7 @@ class control(
       cinder_db_password       => $cinder_db_password,
     }
     # Sets up Nagios control-node monitoring.
-    class { "naginator::control_target": }
+    class { 'naginator::control_target': }
 
     network_config { $::external_interface:
       ensure    => 'present',
@@ -424,17 +424,17 @@ class control(
       cinder_db_password      => $cinder_db_password,
       # swift
       swift                   => $swift_real,
-      swift_store_user        => "services:swift",
+      swift_store_user        => 'services:swift',
       swift_store_key         => $::swift_password,
       swift_user_password     => $::swift_password,
       swift_public_address    => $::swift_proxy_address,
     }
 
     # Sets up Nagios control-node monitoring.
-    class { "naginator::control_target": }
+    class { 'naginator::control_target': }
 
     # Set up Quantum quota support.
-    class { "quantum::quota":
+    class { 'quantum::quota':
       quota_network             => $quantum_quota_network,
       quota_subnet              => $quantum_quota_subnet,
       quota_port                => $quantum_quota_port,
@@ -493,8 +493,8 @@ class control(
         nexus_plugin      => $cisco_nexus_plugin_real
       }
     }
-  
-    class { "coe::quantum_log": }
+
+    class { 'coe::quantum_log': }
 
     # Set up various Ceph scenarios.
     if $::controller_has_mon {
@@ -526,7 +526,6 @@ class cinder_node() {
 }
 
 ### end cinder standalone nodes
- 
 
 ### begin ceph ###
 class ceph_common (
@@ -659,7 +658,7 @@ class compute(
       verbose               => $::verbose,
     }
 
-    class { "naginator::compute_target": }
+    class { 'naginator::compute_target': }
 
     network_config { $::external_interface:
       ensure    => 'present',
@@ -728,9 +727,9 @@ class compute(
       verbose                 => $verbose,
     }
 
-    class { "naginator::compute_target": }
+    class { 'naginator::compute_target': }
 
-    class { "quantum::quota":
+    class { 'quantum::quota':
       quota_network             => $quantum_quota_network,
       quota_subnet              => $quantum_quota_subnet,
       quota_port                => $quantum_quota_port,
@@ -740,7 +739,7 @@ class compute(
       quota_security_group_rule => $quantum_quota_security_group_rule,
     }
 
-    class { "coe::quantum_log": }
+    class { 'coe::quantum_log': }
 
     if $::cinder_ceph_enabled {
       class { 'coe::ceph::compute':
@@ -831,7 +830,7 @@ class load-balancer (
 # in your deployment.  In this example we are using build-node. Note that
 # just the host name is used, not the FQDN.
 #
-node master-node inherits "cobbler-node" {
+node master-node inherits 'cobbler-node' {
   $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
   host { $build_node_fqdn:
@@ -844,9 +843,9 @@ node master-node inherits "cobbler-node" {
 
   # Change the servers for your NTP environment
   # (Must be a reachable NTP Server by your build-node, i.e. ntp.esl.cisco.com)
-  class { ntp:
-    servers    => $::ntp_servers,
+  class { 'ntp':
     ensure     => running,
+    servers    => $::ntp_servers,
     autoupdate => true,
   }
 
@@ -860,7 +859,7 @@ node master-node inherits "cobbler-node" {
 
   # Set up a local apt cache.  Eventually this may become a local
   # mirror/repo instead.
-  class { apt-cacher-ng:
+  class { 'apt-cacher-ng':
     proxy          => $::proxy,
     avoid_if_range => true, # Some proxies have issues with range headers
                             # this stops us attempting to use them
@@ -871,7 +870,7 @@ node master-node inherits "cobbler-node" {
     # Prefetch the pip packages and put them somewhere the openstack nodes
     # can fetch them
 
-    file {  "/var/www/packages":
+    file { '/var/www/packages':
       ensure  => 'directory',
       require => File['/var/www'],
     }
@@ -879,14 +878,14 @@ node master-node inherits "cobbler-node" {
     if($::proxy) {
       $proxy_pfx = "/usr/bin/env http_proxy=${::proxy} https_proxy=${::proxy} "
     } else {
-      $proxy_pfx = ""
+      $proxy_pfx = ''
     }
 
     exec { 'pip2pi':
       # Can't use package provider because we're changing it's behaviour
       # to use the cache.
       command => "${proxy_pfx}/usr/bin/pip install pip2pi",
-      creates => "/usr/local/bin/pip2pi",
+      creates => '/usr/local/bin/pip2pi',
       require => Package['python-pip'],
     }
     Package <| provider=='pip' |> {
@@ -905,9 +904,9 @@ node master-node inherits "cobbler-node" {
 
   # Set the right local puppet environment up.  This builds puppetmaster
   # with storedconfigs (and a local mysql instance).
-  class { puppet:
+  class { 'puppet':
     run_master           => true,
-    puppetmaster_address => $build_node_fqdn, 
+    puppetmaster_address => $build_node_fqdn,
     certname             => $build_node_fqdn,
     mysql_password       => 'ubuntu',
   }<-
