@@ -696,6 +696,13 @@ node 'compute-server01' inherits os_base {
 #$cinder_rbd_pool        = 'volumes'
 #$cinder_rbd_secret_uuid = 'e80afa94-a64c-486c-9e34-d55e85f26406'
 
+# when using ceph-deploy, you must explicitly define your mon information here
+# $mon_initial_members is a list of servernames to run mon on
+# $mon_host is a list of the IP addresses that the mon will listen on on each 
+# respective host
+#$mon_initial_members    = 'server1, server2'
+#$mon_host               = '10.0.0.1,10.0.0.2'
+
 # This global path needs to be uncommented for puppet-ceph to work.
 # Uncomment and define the proxy server if your nodes don't have direct
 # access to the internet. This is due to apt needing to run a wget.
